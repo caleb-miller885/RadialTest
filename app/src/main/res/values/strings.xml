@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- App -->
-    <string name="app_name">UAS ML Spike</string>
+    <string name="app_name">UAS Test</string>
     <!-- description -->
-    <string name="app_desc">Spike: ML actions on UAS Tool waypoints</string>
+    <string name="app_desc">ML actions on UAS Tool waypoints</string>
 
 
 

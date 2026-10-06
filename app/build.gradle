@@ -102,8 +102,8 @@ def supportedFlavors =
 ]
 
 android {
-    compileSdk 36
-    namespace 'com.uasml.spike'
+    compileSdk 34
+    namespace 'com.uastest'
 
     buildFeatures {
         buildConfig = true
