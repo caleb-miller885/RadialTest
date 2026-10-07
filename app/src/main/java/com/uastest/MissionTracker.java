@@ -1,7 +1,5 @@
 package com.uastest;
 
-import android.os.Handler;
-import android.os.Looper;
 import android.util.Log;
 
 import com.atakmap.android.maps.MapEvent;
@@ -81,18 +79,12 @@ final class MissionTracker {
 
     private final MapView mv;
     private final Listener listener;
-    private final Handler main = new Handler(Looper.getMainLooper());
     private final Runnable sync = this::sync;
     // By route_uid, so a renamed mission keeps its actions. Kept when a mission leaves the map,
     // so they are still there if it is drawn again.
     private final Map<String, Mission> missions = new LinkedHashMap<>();
 
-    private final MapEventDispatcher.MapEventDispatchListener mapListener = event -> {
-        if (isWaypoint(event.getItem())) {
-            main.removeCallbacks(sync);
-            main.postDelayed(sync, QUIET_MS);
-        }
-    };
+    private final MapEventDispatcher.MapEventDispatchListener mapListener = this::onMapEvent;
 
     MissionTracker(MapView mv, Listener listener) {
         this.mv = mv;
@@ -108,7 +100,14 @@ final class MissionTracker {
     void stop() {
         mv.getMapEventDispatcher().removeMapEventListener(MapEvent.ITEM_ADDED, mapListener);
         mv.getMapEventDispatcher().removeMapEventListener(MapEvent.ITEM_REMOVED, mapListener);
-        main.removeCallbacks(sync);
+        mv.removeCallbacks(sync);
+    }
+
+    private void onMapEvent(MapEvent event) {
+        if (isWaypoint(event.getItem())) {
+            mv.removeCallbacks(sync);
+            mv.postDelayed(sync, QUIET_MS);
+        }
     }
 
     /** The missions on the map. */
