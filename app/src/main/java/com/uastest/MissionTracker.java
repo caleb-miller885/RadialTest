@@ -79,16 +79,22 @@ final class MissionTracker {
 
     private final MapView mv;
     private final Listener listener;
-    private final Runnable sync = this::sync;
+    private final Runnable sync;
+    private final MapEventDispatcher.MapEventDispatchListener mapListener;
     // By route_uid, so a renamed mission keeps its actions. Kept when a mission leaves the map,
     // so they are still there if it is drawn again.
     private final Map<String, Mission> missions = new LinkedHashMap<>();
 
-    private final MapEventDispatcher.MapEventDispatchListener mapListener = this::onMapEvent;
-
     MissionTracker(MapView mv, Listener listener) {
         this.mv = mv;
         this.listener = listener;
+        sync = () -> sync();
+        mapListener = event -> {
+            if (isWaypoint(event.getItem())) {
+                mv.removeCallbacks(sync);
+                mv.postDelayed(sync, QUIET_MS);
+            }
+        };
     }
 
     void start() {
@@ -101,13 +107,6 @@ final class MissionTracker {
         mv.getMapEventDispatcher().removeMapEventListener(MapEvent.ITEM_ADDED, mapListener);
         mv.getMapEventDispatcher().removeMapEventListener(MapEvent.ITEM_REMOVED, mapListener);
         mv.removeCallbacks(sync);
-    }
-
-    private void onMapEvent(MapEvent event) {
-        if (isWaypoint(event.getItem())) {
-            mv.removeCallbacks(sync);
-            mv.postDelayed(sync, QUIET_MS);
-        }
     }
 
     /** The missions on the map. */
