@@ -27,49 +27,49 @@ import java.util.Map;
  * A drag shows up as one point gone and one new in the same count: the same waypoint, moved.
  * An action belongs to its Waypoint, so it follows the point, not its number.
  */
-final class MissionTracker {
+public final class MissionTracker {
 
-    static final String TAG = "UasTest";
+    private static final String TAG = "UasTest";
     private static final String GROUP = "UAS Routes";
     private static final String META_ROUTE = "route_uid";
     private static final String META_TITLE = "mission_point_title";
 
-    static final class Waypoint {
-        final Mission mission;
-        double lat, lon;
-        String title;   // UAS Tool's, e.g. WP-3: renumbered by inserts and deletes
-        String action;  // null: none
+    public static final class Waypoint {
+        public final Mission mission;
+        public double lat, lon;
+        public String title;   // UAS Tool's, e.g. WP-3: renumbered by inserts and deletes
+        public String action;  // null: none
 
-        Waypoint(Mission mission, PointMapItem marker) {
+        private Waypoint(Mission mission, PointMapItem marker) {
             this.mission = mission;
             update(marker);
         }
 
-        void update(PointMapItem marker) {
+        private void update(PointMapItem marker) {
             GeoPoint p = marker.getPoint();
             lat = p.getLatitude();
             lon = p.getLongitude();
             title = marker.getMetaString(META_TITLE, marker.getTitle());
         }
 
-        boolean at(PointMapItem marker) {
+        private boolean at(PointMapItem marker) {
             GeoPoint p = marker.getPoint();
             return Math.abs(lat - p.getLatitude()) < 1e-7 && Math.abs(lon - p.getLongitude()) < 1e-7;
         }
 
         /** 1-based place in the flight order. */
-        int number() {
+        public int number() {
             return mission.waypoints.indexOf(this) + 1;
         }
     }
 
-    static final class Mission {
-        String name;
-        final List<Waypoint> waypoints = new ArrayList<>();  // flight order
-        boolean onMap;
+    public static final class Mission {
+        public String name;
+        public final List<Waypoint> waypoints = new ArrayList<>();  // flight order
+        private boolean onMap;
     }
 
-    interface Listener {
+    public interface Listener {
         /** The missions or their actions changed. Main thread. */
         void onMissionsChanged(List<Mission> missions);
     }
@@ -85,7 +85,7 @@ final class MissionTracker {
     // so they are still there if it is drawn again.
     private final Map<String, Mission> missions = new LinkedHashMap<>();
 
-    MissionTracker(MapView mv, Listener listener) {
+    public MissionTracker(MapView mv, Listener listener) {
         this.mv = mv;
         this.listener = listener;
         sync = () -> sync();
@@ -97,27 +97,27 @@ final class MissionTracker {
         };
     }
 
-    void start() {
+    public void start() {
         mv.getMapEventDispatcher().addMapEventListener(MapEvent.ITEM_ADDED, mapListener);
         mv.getMapEventDispatcher().addMapEventListener(MapEvent.ITEM_REMOVED, mapListener);
         sync();
     }
 
-    void stop() {
+    public void stop() {
         mv.getMapEventDispatcher().removeMapEventListener(MapEvent.ITEM_ADDED, mapListener);
         mv.getMapEventDispatcher().removeMapEventListener(MapEvent.ITEM_REMOVED, mapListener);
         mv.removeCallbacks(sync);
     }
 
     /** The missions on the map. */
-    List<Mission> missions() {
+    public List<Mission> missions() {
         List<Mission> list = new ArrayList<>();
         for (Mission m : missions.values()) if (m.onMap) list.add(m);
         return list;
     }
 
     /** Our waypoint for a UAS Tool waypoint marker, or null (e.g. drawn since the last read). */
-    Waypoint waypoint(MapItem marker) {
+    public Waypoint waypoint(MapItem marker) {
         if (!isWaypoint(marker)) return null;
         Mission m = missions.get(marker.getMetaString(META_ROUTE, ""));
         if (m == null || !m.onMap) return null;
@@ -126,7 +126,7 @@ final class MissionTracker {
     }
 
     /** Sets (or with null, clears) a waypoint's action. */
-    void setAction(Waypoint w, String action) {
+    public void setAction(Waypoint w, String action) {
         w.action = action;
         log(w.mission);
         listener.onMissionsChanged(missions());

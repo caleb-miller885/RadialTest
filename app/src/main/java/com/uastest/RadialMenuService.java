@@ -17,7 +17,7 @@ import gov.tak.api.widgets.IMapMenuButtonWidget;
  * Adds an ML button to the radial menu of UAS Tool mission waypoints, and only those: not survey
  * points, nor other UAS Tool items.
  */
-final class RadialMenuService {
+public final class RadialMenuService {
 
     private final Context context;
     private final MissionTracker tracker;
@@ -27,7 +27,7 @@ final class RadialMenuService {
 
     private final MapMenuHandler handler;
 
-    RadialMenuService(Context atakContext, MissionTracker tracker) {
+    public RadialMenuService(Context atakContext, MissionTracker tracker) {
         this.context = atakContext;
         this.tracker = tracker;
         handler = (item, menu) -> {
@@ -35,11 +35,11 @@ final class RadialMenuService {
         };
     }
 
-    void start() {
+    public void start() {
         MapMenuReceiver.getInstance().registerMapMenuHandler(handler, PRIORITY);
     }
 
-    void stop() {
+    public void stop() {
         MapMenuReceiver.getInstance().unregisterMapMenuHandler(handler);
     }
 
@@ -82,7 +82,7 @@ final class RadialMenuService {
     }
 
     /** Start / stop / change / clear for one waypoint. Also used by the pane. */
-    void showActionPicker(MissionTracker.Waypoint w) {
+    public void showActionPicker(MissionTracker.Waypoint w) {
         String[] choices = {"Start", "Stop", "Change", "Clear"};
         String[] actions = {"START", "STOP", "CHANGE", null};
         new AlertDialog.Builder(context)

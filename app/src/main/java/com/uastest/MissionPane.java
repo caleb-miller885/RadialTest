@@ -14,7 +14,7 @@ import gov.tak.api.ui.Pane;
 import gov.tak.api.ui.PaneBuilder;
 
 /** Every mission, and under each its waypoints with their actions. Tap a waypoint to set one. */
-final class MissionPane {
+public final class MissionPane {
 
     private final IHostUIService ui;
     private final Context ctx;
@@ -23,7 +23,7 @@ final class MissionPane {
     private final LinearLayout list;
     private final Pane pane;
 
-    MissionPane(IHostUIService ui, Context pluginContext, MissionTracker tracker,
+    public MissionPane(IHostUIService ui, Context pluginContext, MissionTracker tracker,
             RadialMenuService radial) {
         this.ui = ui;
         this.ctx = pluginContext;
@@ -43,17 +43,17 @@ final class MissionPane {
                 .build();
     }
 
-    void show() {
+    public void show() {
         render();
         if (!ui.isPaneVisible(pane)) ui.showPane(pane, null);
     }
 
     /** Redraws if open; call whenever the mission list changes. */
-    void refresh() {
+    public void refresh() {
         if (ui.isPaneVisible(pane)) render();
     }
 
-    void close() {
+    public void close() {
         if (ui.isPaneVisible(pane)) ui.closePane(pane);
     }
 
