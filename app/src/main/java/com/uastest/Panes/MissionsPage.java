@@ -1,66 +1,45 @@
-package com.uastest;
+package com.uastest.Panes;
 
 import android.content.Context;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.widget.LinearLayout;
+import android.view.View;
 import android.widget.ScrollView;
 import android.widget.TextView;
 
+import com.uastest.Services.MissionTracker;
+import com.uastest.Services.UasServiceRegistry;
+
 import java.util.List;
 
-import gov.tak.api.ui.IHostUIService;
-import gov.tak.api.ui.Pane;
-import gov.tak.api.ui.PaneBuilder;
-
 /** Every mission, and under each its waypoints with their actions. Tap a waypoint to set one. */
-public final class MissionPane {
+public final class MissionsPage {
 
-    private final IHostUIService ui;
     private final Context ctx;
-    private final MissionTracker tracker;
-    private final RadialMenuService radial;
+    private final UasServiceRegistry services;
     private final LinearLayout list;
-    private final Pane pane;
+    private final ScrollView view;
 
-    public MissionPane(IHostUIService ui, Context pluginContext, MissionTracker tracker,
-            RadialMenuService radial) {
-        this.ui = ui;
+    public MissionsPage(Context pluginContext, UasServiceRegistry services) {
         this.ctx = pluginContext;
-        this.tracker = tracker;
-        this.radial = radial;
+        this.services = services;
 
         list = new LinearLayout(ctx);
         list.setOrientation(LinearLayout.VERTICAL);
         list.setPadding(dp(12), dp(12), dp(12), dp(12));
-        ScrollView scroll = new ScrollView(ctx);
-        scroll.addView(list);
-
-        pane = new PaneBuilder(scroll)
-                .setMetaValue(Pane.RELATIVE_LOCATION, Pane.Location.Default)
-                .setMetaValue(Pane.PREFERRED_WIDTH_RATIO, 0.33D)
-                .setMetaValue(Pane.PREFERRED_HEIGHT_RATIO, 0.5D)
-                .build();
+        view = new ScrollView(ctx);
+        view.addView(list);
     }
 
-    public void show() {
-        render();
-        if (!ui.isPaneVisible(pane)) ui.showPane(pane, null);
+    public View getView() {
+        return view;
     }
 
-    /** Redraws if open; call whenever the mission list changes. */
     public void refresh() {
-        if (ui.isPaneVisible(pane)) render();
-    }
-
-    public void close() {
-        if (ui.isPaneVisible(pane)) ui.closePane(pane);
-    }
-
-    private void render() {
         list.removeAllViews();
         list.addView(text("UAS Tool missions", 18, Color.WHITE, true));
-        List<MissionTracker.Mission> missions = tracker.missions();
+        List<MissionTracker.Mission> missions = services.missionTracker.missions();
         if (missions.isEmpty())
             list.addView(text("No UAS Tool missions on the map.", 14, Color.LTGRAY, false));
 
@@ -76,7 +55,7 @@ public final class MissionPane {
                         14, w.action == null ? Color.LTGRAY : Color.rgb(120, 200, 255), false);
                 row.setTypeface(Typeface.MONOSPACE);
                 row.setPadding(dp(8), dp(6), 0, dp(6));
-                row.setOnClickListener(v -> radial.showActionPicker(w));
+                row.setOnClickListener(v -> services.radialMenu.showActionPicker(w));
                 list.addView(row);
             }
         }

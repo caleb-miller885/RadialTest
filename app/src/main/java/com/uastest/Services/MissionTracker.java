@@ -1,4 +1,4 @@
-package com.uastest;
+package com.uastest.Services;
 
 import android.util.Log;
 
@@ -78,16 +78,15 @@ public final class MissionTracker {
     private static final long QUIET_MS = 300;
 
     private final MapView mv;
-    private final Listener listener;
+    private Listener listener;
     private final Runnable sync;
     private final MapEventDispatcher.MapEventDispatchListener mapListener;
     // By route_uid, so a renamed mission keeps its actions. Kept when a mission leaves the map,
     // so they are still there if it is drawn again.
     private final Map<String, Mission> missions = new LinkedHashMap<>();
 
-    public MissionTracker(MapView mv, Listener listener) {
+    public MissionTracker(MapView mv) {
         this.mv = mv;
-        this.listener = listener;
         sync = () -> sync();
         mapListener = event -> {
             if (isWaypoint(event.getItem())) {
@@ -95,6 +94,11 @@ public final class MissionTracker {
                 mv.postDelayed(sync, QUIET_MS);
             }
         };
+    }
+
+    /** Who to tell when the missions or their actions change; set before {@link #start()}. */
+    public void setListener(Listener l) {
+        listener = l;
     }
 
     public void start() {
@@ -129,7 +133,7 @@ public final class MissionTracker {
     public void setAction(Waypoint w, String action) {
         w.action = action;
         log(w.mission);
-        listener.onMissionsChanged(missions());
+        notifyListener();
     }
 
     /**
@@ -158,7 +162,11 @@ public final class MissionTracker {
                 log(m);
             }
         }
-        listener.onMissionsChanged(missions());
+        notifyListener();
+    }
+
+    private void notifyListener() {
+        if (listener != null) listener.onMissionsChanged(missions());
     }
 
     /** A mission group's waypoint markers in flight order. */

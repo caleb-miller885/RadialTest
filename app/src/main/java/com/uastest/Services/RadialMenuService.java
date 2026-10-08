@@ -1,4 +1,4 @@
-package com.uastest;
+package com.uastest.Services;
 
 import android.app.AlertDialog;
 import android.content.Context;

@@ -4,6 +4,8 @@ import android.content.Context;
 
 import com.atak.plugins.impl.PluginContextProvider;
 import com.atakmap.android.maps.MapView;
+import com.uastest.Panes.UasPaneRegistry;
+import com.uastest.Services.UasServiceRegistry;
 
 import gov.tak.api.plugin.IPlugin;
 import gov.tak.api.plugin.IServiceController;
@@ -15,11 +17,11 @@ import gov.tak.platform.marshal.MarshalManager;
 /**
  * Test: ML actions on UAS Tool mission waypoints.
  * <ul>
- *   <li>{@link MissionTracker}: UAS Tool's missions as drawn on the map, waypoints in flight
- *       order, plus our action per waypoint.</li>
- *   <li>{@link RadialMenuService}: the ML button, on UAS Tool mission waypoints only.</li>
- *   <li>{@link MissionPane}: all missions, their waypoints and actions (toolbar button).</li>
+ *   <li>{@link UasServiceRegistry}: the mission tracker and the ML radial menu button;</li>
+ *   <li>{@link UasPaneRegistry}: the UI: all missions, their waypoints and actions (toolbar
+ *       button).</li>
  * </ul>
+ * The plugin wires the services to the UI: the mission tracker's changes go to the panes.
  * Logs each mission's waypoints and actions to logcat (tag UasTest) each time they change.
  */
 public class UasTestPlugin implements IPlugin {
@@ -29,9 +31,8 @@ public class UasTestPlugin implements IPlugin {
     private final MapView mv;
     private final ToolbarItem toolbarItem;
 
-    private MissionTracker tracker;
-    private RadialMenuService radial;
-    private MissionPane pane;
+    private UasServiceRegistry services;
+    private UasPaneRegistry paneRegistry;
 
     public UasTestPlugin(IServiceController serviceController) {
         pluginContext = serviceController.getService(PluginContextProvider.class).getPluginContext();
@@ -48,7 +49,7 @@ public class UasTestPlugin implements IPlugin {
                 .setListener(new ToolbarItemAdapter() {
                     @Override
                     public void onClick(ToolbarItem item) {
-                        if (pane != null) pane.show();
+                        if (paneRegistry != null) paneRegistry.show();
                     }
                 })
                 .setIdentifier(pluginContext.getPackageName())
@@ -58,15 +59,15 @@ public class UasTestPlugin implements IPlugin {
     @Override
     public void onStart() {
         if (uiService == null) return;
-        tracker = new MissionTracker(mv, missions -> {
-            if (pane != null) pane.refresh();
+        services = new UasServiceRegistry(mv);
+        paneRegistry = new UasPaneRegistry(uiService, pluginContext, services);
+        // Before services.onStart(): the tracker reads the map as soon as it starts.
+        services.missionTracker.setListener(missions -> {
+            if (paneRegistry != null) paneRegistry.onMissionsChanged();
             // Stream to each platform's onboard service from here: per mission, its waypoints in
             // flight order with their actions.
         });
-        radial = new RadialMenuService(mv.getContext(), tracker);
-        pane = new MissionPane(uiService, pluginContext, tracker, radial);
-        tracker.start();
-        radial.start();
+        services.onStart();
         uiService.addToolbarItem(toolbarItem);
     }
 
@@ -74,11 +75,15 @@ public class UasTestPlugin implements IPlugin {
     public void onStop() {
         if (uiService == null) return;
         uiService.removeToolbarItem(toolbarItem);
-        if (pane != null) pane.close();
-        if (radial != null) radial.stop();
-        if (tracker != null) tracker.stop();
-        pane = null;
-        radial = null;
-        tracker = null;
+        // UI first, and the listener off, so stopping the services doesn't update a closed pane.
+        if (paneRegistry != null) {
+            paneRegistry.onStop();
+            paneRegistry = null;
+        }
+        if (services != null) {
+            services.missionTracker.setListener(null);
+            services.onStop();
+            services = null;
+        }
     }
 }
