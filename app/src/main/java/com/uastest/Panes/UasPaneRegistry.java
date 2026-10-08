@@ -6,37 +6,32 @@ import com.uastest.Services.UasServiceRegistry;
 
 import gov.tak.api.ui.IHostUIService;
 import gov.tak.api.ui.Pane;
-import gov.tak.api.ui.PaneBuilder;
 
-/** The plugin's UI: one ATAK pane showing the {@link MissionsPage}. */
+/** The plugin's UI: the {@link MissionsPane}, opened from the toolbar button. */
 public class UasPaneRegistry {
 
     private final IHostUIService uiService;
-    private final MissionsPage missionsPage;
-    private final Pane pane;
+    private final MissionsPane missionsPane;
+    private Pane missions;   // built the first time it is shown
 
     public UasPaneRegistry(IHostUIService uiService, Context pluginContext, UasServiceRegistry services) {
         this.uiService = uiService;
-        missionsPage = new MissionsPage(pluginContext, services);
-        pane = new PaneBuilder(missionsPage.getView())
-                .setMetaValue(Pane.RELATIVE_LOCATION, Pane.Location.Default)
-                .setMetaValue(Pane.PREFERRED_WIDTH_RATIO, 0.4D)
-                .setMetaValue(Pane.PREFERRED_HEIGHT_RATIO, 0.7D)
-                .build();
+        missionsPane = new MissionsPane(pluginContext, services);
     }
 
     /** Toolbar button. */
-    public void show() {
-        missionsPage.refresh();
-        if (!uiService.isPaneVisible(pane)) uiService.showPane(pane, null);
+    public void showMissions() {
+        missions = missionsPane.getPane();
+        missionsPane.refresh();
+        if (!uiService.isPaneVisible(missions)) uiService.showPane(missions, null);
     }
 
-    /** From the mission tracker (main thread): redraw if open. */
+    /** From the mission tracker's listener (main thread): redraw if open. */
     public void onMissionsChanged() {
-        if (uiService.isPaneVisible(pane)) missionsPage.refresh();
+        if (missions != null && uiService.isPaneVisible(missions)) missionsPane.refresh();
     }
 
     public void onStop() {
-        if (uiService.isPaneVisible(pane)) uiService.closePane(pane);
+        if (missions != null && uiService.isPaneVisible(missions)) uiService.closePane(missions);
     }
 }

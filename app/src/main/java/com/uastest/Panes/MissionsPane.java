@@ -14,33 +14,52 @@ import com.uastest.Services.UasServiceRegistry;
 import java.util.List;
 import java.util.Locale;
 
+import gov.tak.api.ui.Pane;
+import gov.tak.api.ui.PaneBuilder;
+
 /**
  * Every mission as a card, and in each its waypoints in flight order with their actions. Tap a
  * waypoint to set its action.
+ *
+ * {@link #getPane()} inflates and builds the pane the first time it is asked for ({@link
+ * #initPane} binds its views); {@link #refresh()} redraws it from the mission tracker: when it is
+ * shown, and when the missions change while it is open.
  */
-public final class MissionsPage {
+public final class MissionsPane {
 
     private final Context ctx;
     private final UasServiceRegistry services;
-    private final View root;
-    private final TextView counts;
-    private final TextView empty;
-    private final LinearLayout missionsList;
 
-    public MissionsPage(Context pluginContext, UasServiceRegistry services) {
+    private Pane pane;
+    private TextView tvCounts, tvEmpty;
+    private LinearLayout missionsList;
+
+    public MissionsPane(Context pluginContext, UasServiceRegistry services) {
         this.ctx = pluginContext;
         this.services = services;
-        root = PluginLayoutInflater.inflate(ctx, R.layout.uas_pane, null);
-        counts = root.findViewById(R.id.tv_counts);
-        empty = root.findViewById(R.id.tv_empty);
+    }
+
+    public Pane getPane() {
+        if (pane == null) {
+            View root = PluginLayoutInflater.inflate(ctx, R.layout.uas_pane, null);
+            initPane(root);
+            pane = new PaneBuilder(root)
+                    .setMetaValue(Pane.RELATIVE_LOCATION, Pane.Location.Default)
+                    .setMetaValue(Pane.PREFERRED_WIDTH_RATIO, 0.4D)
+                    .setMetaValue(Pane.PREFERRED_HEIGHT_RATIO, 0.7D)
+                    .build();
+        }
+        return pane;
+    }
+
+    private void initPane(View root) {
+        tvCounts = root.findViewById(R.id.tv_counts);
+        tvEmpty = root.findViewById(R.id.tv_empty);
         missionsList = root.findViewById(R.id.missions);
     }
 
-    public View getView() {
-        return root;
-    }
-
     public void refresh() {
+        if (missionsList == null) return;   // not built yet
         List<MissionTracker.Mission> missions = services.missionTracker.missions();
         missionsList.removeAllViews();
         int waypoints = 0;
@@ -48,8 +67,8 @@ public final class MissionsPage {
             missionsList.addView(missionCard(m));
             waypoints += m.waypoints.size();
         }
-        empty.setVisibility(missions.isEmpty() ? View.VISIBLE : View.GONE);
-        counts.setText(missions.isEmpty() ? "" : plural(missions.size(), "mission")
+        tvEmpty.setVisibility(missions.isEmpty() ? View.VISIBLE : View.GONE);
+        tvCounts.setText(missions.isEmpty() ? "" : plural(missions.size(), "mission")
                 + " · " + plural(waypoints, "WP"));
     }
 

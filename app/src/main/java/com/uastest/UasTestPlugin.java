@@ -49,7 +49,7 @@ public class UasTestPlugin implements IPlugin {
                 .setListener(new ToolbarItemAdapter() {
                     @Override
                     public void onClick(ToolbarItem item) {
-                        if (paneRegistry != null) paneRegistry.show();
+                        if (paneRegistry != null) paneRegistry.showMissions();
                     }
                 })
                 .setIdentifier(pluginContext.getPackageName())
