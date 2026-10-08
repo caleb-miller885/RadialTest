@@ -197,10 +197,6 @@ public final class MissionTracker {
             Log.i(TAG, m.name + ": " + matched[unmatched].title + " moved");
         }
 
-        for (Waypoint gone : old)
-            if (gone.action != null)
-                Log.i(TAG, m.name + ": " + gone.title + " removed, dropped " + gone.action);
-
         m.waypoints.clear();
         for (int i = 0; i < markers.size(); i++) {
             Waypoint w = matched[i] != null ? matched[i] : new Waypoint(m, markers.get(i));
