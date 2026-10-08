@@ -21,7 +21,7 @@
         android:layout_height="26dp"
         android:gravity="center"
         android:background="@drawable/uas_badge"
-        android:textColor="@color/uas_accent"
+        android:textColor="#37D0B4"
         android:textSize="12sp"
         android:textStyle="bold" />
 
@@ -38,7 +38,7 @@
             android:layout_height="wrap_content"
             android:singleLine="true"
             android:ellipsize="end"
-            android:textColor="@color/uas_text_primary"
+            android:textColor="#E8EEF3"
             android:textSize="13sp"
             android:textStyle="bold" />
 
@@ -49,12 +49,22 @@
             android:layout_marginTop="1dp"
             android:singleLine="true"
             android:fontFamily="monospace"
-            android:textColor="@color/uas_text_secondary"
+            android:textColor="#8FA3B5"
             android:textSize="11sp" />
     </LinearLayout>
 
     <TextView
         android:id="@+id/tv_action"
-        style="@style/UasPill"
-        android:layout_marginStart="8dp" />
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:paddingStart="10dp"
+        android:paddingEnd="10dp"
+        android:paddingTop="3dp"
+        android:paddingBottom="3dp"
+        android:background="@drawable/uas_pill"
+        android:textSize="11sp"
+        android:textStyle="bold"
+        android:letterSpacing="0.06"
+        android:singleLine="true" />
 </LinearLayout>

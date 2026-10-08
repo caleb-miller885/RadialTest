@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- Mission card -->
 <shape xmlns:android="http://schemas.android.com/apk/res/android" android:shape="rectangle">
-    <solid android:color="@color/uas_card_bg" />
+    <solid android:color="#1E2A36" />
     <corners android:radius="10dp" />
 </shape>

@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:background="@color/uas_bg_dark">
+    android:background="#11161C">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -13,7 +13,7 @@
         android:gravity="center_vertical"
         android:paddingStart="14dp"
         android:paddingEnd="12dp"
-        android:background="@color/uas_surface">
+        android:background="#18212B">
 
         <TextView
             android:layout_width="0dp"
@@ -22,7 +22,7 @@
             android:singleLine="true"
             android:ellipsize="end"
             android:text="@string/pane_title"
-            android:textColor="@color/uas_text_primary"
+            android:textColor="#E8EEF3"
             android:textStyle="bold"
             android:textSize="15sp"
             android:letterSpacing="0.06" />
@@ -31,7 +31,7 @@
             android:id="@+id/tv_counts"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textColor="@color/uas_accent"
+            android:textColor="#37D0B4"
             android:textSize="11sp"
             android:textStyle="bold" />
     </LinearLayout>
@@ -39,7 +39,7 @@
     <View
         android:layout_width="match_parent"
         android:layout_height="1dp"
-        android:background="@color/uas_divider" />
+        android:background="#2C3B4A" />
 
     <FrameLayout
         android:layout_width="match_parent"
@@ -67,7 +67,7 @@
             android:gravity="center"
             android:padding="24dp"
             android:text="@string/pane_empty"
-            android:textColor="@color/uas_text_secondary"
+            android:textColor="#8FA3B5"
             android:textSize="13sp"
             android:lineSpacingExtra="3dp" />
     </FrameLayout>

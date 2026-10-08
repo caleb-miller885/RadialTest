@@ -27,6 +27,13 @@ import gov.tak.api.ui.PaneBuilder;
  */
 public final class MissionsPane {
 
+    private static final int ACCENT = 0xFF37D0B4;
+    private static final int ACCENT_BG = 0xFF16332F;
+    private static final int TEXT_SECONDARY = 0xFF8FA3B5;
+    private static final int ACTION_START = 0xFF4CD07D;
+    private static final int ACTION_STOP = 0xFFFF6B5A;
+    private static final int ACTION_CHANGE = 0xFFFFB547;
+
     private final Context ctx;
     private final UasServiceRegistry services;
 
@@ -77,8 +84,8 @@ public final class MissionsPane {
         ((TextView) card.findViewById(R.id.tv_name)).setText(m.name);
         TextView count = card.findViewById(R.id.tv_waypoints);
         count.setText(plural(m.waypoints.size(), "WP"));
-        count.setTextColor(color(R.color.uas_accent));
-        count.setBackgroundTintList(ColorStateList.valueOf(color(R.color.uas_accent_bg)));
+        count.setTextColor(ACCENT);
+        count.setBackgroundTintList(ColorStateList.valueOf(ACCENT_BG));
 
         LinearLayout rows = card.findViewById(R.id.waypoints);
         for (MissionTracker.Waypoint w : m.waypoints) rows.addView(waypointRow(w));
@@ -95,7 +102,7 @@ public final class MissionsPane {
         TextView action = row.findViewById(R.id.tv_action);
         if (w.action == null) {
             action.setText(R.string.set_action);
-            action.setTextColor(color(R.color.uas_text_secondary));
+            action.setTextColor(TEXT_SECONDARY);
             action.setBackgroundResource(R.drawable.uas_pill_outline);
         } else {
             int c = actionColor(w.action);
@@ -108,19 +115,15 @@ public final class MissionsPane {
         return row;
     }
 
-    private int actionColor(String action) {
+    private static int actionColor(String action) {
         switch (action) {
             case "START":
-                return color(R.color.uas_action_start);
+                return ACTION_START;
             case "STOP":
-                return color(R.color.uas_action_stop);
+                return ACTION_STOP;
             default:
-                return color(R.color.uas_action_change);
+                return ACTION_CHANGE;
         }
-    }
-
-    private int color(int res) {
-        return ctx.getColor(res);
     }
 
     private static String plural(int n, String what) {
