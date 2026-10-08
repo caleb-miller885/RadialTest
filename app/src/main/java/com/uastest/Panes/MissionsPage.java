@@ -1,78 +1,110 @@
 package com.uastest.Panes;
 
 import android.content.Context;
-import android.graphics.Color;
-import android.graphics.Typeface;
-import android.widget.LinearLayout;
+import android.content.res.ColorStateList;
 import android.view.View;
-import android.widget.ScrollView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.atak.plugins.impl.PluginLayoutInflater;
+import com.uastest.R;
 import com.uastest.Services.MissionTracker;
 import com.uastest.Services.UasServiceRegistry;
 
 import java.util.List;
+import java.util.Locale;
 
-/** Every mission, and under each its waypoints with their actions. Tap a waypoint to set one. */
+/**
+ * Every mission as a card, and in each its waypoints in flight order with their actions. Tap a
+ * waypoint to set its action.
+ */
 public final class MissionsPage {
 
     private final Context ctx;
     private final UasServiceRegistry services;
-    private final LinearLayout list;
-    private final ScrollView view;
+    private final View root;
+    private final TextView counts;
+    private final TextView empty;
+    private final LinearLayout missionsList;
 
     public MissionsPage(Context pluginContext, UasServiceRegistry services) {
         this.ctx = pluginContext;
         this.services = services;
-
-        list = new LinearLayout(ctx);
-        list.setOrientation(LinearLayout.VERTICAL);
-        list.setPadding(dp(12), dp(12), dp(12), dp(12));
-        view = new ScrollView(ctx);
-        view.addView(list);
+        root = PluginLayoutInflater.inflate(ctx, R.layout.uas_pane, null);
+        counts = root.findViewById(R.id.tv_counts);
+        empty = root.findViewById(R.id.tv_empty);
+        missionsList = root.findViewById(R.id.missions);
     }
 
     public View getView() {
-        return view;
+        return root;
     }
 
     public void refresh() {
-        list.removeAllViews();
-        list.addView(text("UAS Tool missions", 18, Color.WHITE, true));
         List<MissionTracker.Mission> missions = services.missionTracker.missions();
-        if (missions.isEmpty())
-            list.addView(text("No UAS Tool missions on the map.", 14, Color.LTGRAY, false));
-
+        missionsList.removeAllViews();
+        int waypoints = 0;
         for (MissionTracker.Mission m : missions) {
-            TextView header = text(m.name, 16, Color.WHITE, true);
-            header.setPadding(0, dp(14), 0, dp(2));
-            list.addView(header);
-            list.addView(text(m.waypoints.size() + " waypoints", 11, Color.GRAY, false));
+            missionsList.addView(missionCard(m));
+            waypoints += m.waypoints.size();
+        }
+        empty.setVisibility(missions.isEmpty() ? View.VISIBLE : View.GONE);
+        counts.setText(missions.isEmpty() ? "" : plural(missions.size(), "mission")
+                + " · " + plural(waypoints, "WP"));
+    }
 
-            for (MissionTracker.Waypoint w : m.waypoints) {
-                TextView row = text(String.format("%2d  %-6s %.5f, %.5f   %s", w.number(), w.title,
-                        w.lat, w.lon, w.action == null ? "—" : "▸ " + w.action),
-                        14, w.action == null ? Color.LTGRAY : Color.rgb(120, 200, 255), false);
-                row.setTypeface(Typeface.MONOSPACE);
-                row.setPadding(dp(8), dp(6), 0, dp(6));
-                row.setOnClickListener(v -> services.radialMenu.showActionPicker(w));
-                list.addView(row);
-            }
+    private View missionCard(MissionTracker.Mission m) {
+        View card = PluginLayoutInflater.inflate(ctx, R.layout.item_mission_card, null);
+        ((TextView) card.findViewById(R.id.tv_name)).setText(m.name);
+        TextView count = card.findViewById(R.id.tv_waypoints);
+        count.setText(plural(m.waypoints.size(), "WP"));
+        count.setTextColor(color(R.color.uas_accent));
+        count.setBackgroundTintList(ColorStateList.valueOf(color(R.color.uas_accent_bg)));
+
+        LinearLayout rows = card.findViewById(R.id.waypoints);
+        for (MissionTracker.Waypoint w : m.waypoints) rows.addView(waypointRow(w));
+        return card;
+    }
+
+    private View waypointRow(MissionTracker.Waypoint w) {
+        View row = PluginLayoutInflater.inflate(ctx, R.layout.item_waypoint_row, null);
+        ((TextView) row.findViewById(R.id.tv_number)).setText(String.valueOf(w.number()));
+        ((TextView) row.findViewById(R.id.tv_title)).setText(w.title);
+        ((TextView) row.findViewById(R.id.tv_position)).setText(
+                String.format(Locale.US, "%.5f, %.5f", w.lat, w.lon));
+
+        TextView action = row.findViewById(R.id.tv_action);
+        if (w.action == null) {
+            action.setText(R.string.set_action);
+            action.setTextColor(color(R.color.uas_text_secondary));
+            action.setBackgroundResource(R.drawable.uas_pill_outline);
+        } else {
+            int c = actionColor(w.action);
+            action.setText(w.action);
+            action.setTextColor(c);
+            // The action's colour at ~20% over the card.
+            action.setBackgroundTintList(ColorStateList.valueOf((c & 0x00FFFFFF) | 0x33000000));
+        }
+        row.setOnClickListener(v -> services.radialMenu.showActionPicker(w));
+        return row;
+    }
+
+    private int actionColor(String action) {
+        switch (action) {
+            case "START":
+                return color(R.color.uas_action_start);
+            case "STOP":
+                return color(R.color.uas_action_stop);
+            default:
+                return color(R.color.uas_action_change);
         }
     }
 
-    private TextView text(String s, int sp, int color, boolean bold) {
-        TextView t = new TextView(ctx);
-        t.setText(s);
-        t.setTextSize(sp);
-        t.setTextColor(color);
-        if (bold) t.setTypeface(Typeface.DEFAULT_BOLD);
-        t.setLayoutParams(new LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT));
-        return t;
+    private int color(int res) {
+        return ctx.getColor(res);
     }
 
-    private int dp(int v) {
-        return (int) (v * ctx.getResources().getDisplayMetrics().density + 0.5f);
+    private static String plural(int n, String what) {
+        return n + " " + what + (n == 1 ? "" : "s");
     }
 }

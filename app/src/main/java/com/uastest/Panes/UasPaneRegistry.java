@@ -20,8 +20,8 @@ public class UasPaneRegistry {
         missionsPage = new MissionsPage(pluginContext, services);
         pane = new PaneBuilder(missionsPage.getView())
                 .setMetaValue(Pane.RELATIVE_LOCATION, Pane.Location.Default)
-                .setMetaValue(Pane.PREFERRED_WIDTH_RATIO, 0.33D)
-                .setMetaValue(Pane.PREFERRED_HEIGHT_RATIO, 0.5D)
+                .setMetaValue(Pane.PREFERRED_WIDTH_RATIO, 0.4D)
+                .setMetaValue(Pane.PREFERRED_HEIGHT_RATIO, 0.7D)
                 .build();
     }
 

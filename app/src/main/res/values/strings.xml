@@ -5,7 +5,8 @@
     <!-- description -->
     <string name="app_desc">ML actions on UAS Tool waypoints</string>
 
-
-
-
+    <!-- Pane -->
+    <string name="pane_title">UAS MISSIONS</string>
+    <string name="pane_empty">No UAS Tool missions on the map.\nCreate or open one in UAS Tool and its waypoints appear here.</string>
+    <string name="set_action">Set action</string>
 </resources>

@@ -1,4 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <color name="white">#ffffff</color>
+
+    <!-- Pane palette: night-ops slate, teal accent -->
+    <color name="uas_bg_dark">#11161C</color>
+    <color name="uas_surface">#18212B</color>
+    <color name="uas_card_bg">#1E2A36</color>
+    <color name="uas_divider">#2C3B4A</color>
+    <color name="uas_text_primary">#E8EEF3</color>
+    <color name="uas_text_secondary">#8FA3B5</color>
+    <color name="uas_accent">#37D0B4</color>
+    <color name="uas_accent_bg">#16332F</color>
+
+    <!-- ML actions -->
+    <color name="uas_action_start">#4CD07D</color>
+    <color name="uas_action_stop">#FF6B5A</color>
+    <color name="uas_action_change">#FFB547</color>
 </resources>
